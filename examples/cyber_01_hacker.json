@@ -1,0 +1,190 @@
+{
+ "title": "Hacker siz haqingizda nimalarni bilishi mumkin",
+ "brand": "FR3NZY",
+ "template": "cyber",
+ "captions": false,
+ "voice_rate": "+8%",
+ "voice_pitch": "-3Hz",
+ "music_file": "Cyborg Ninja.mp3",
+ "music_volume": 0.28,
+ "music_curve": [
+  {
+   "scene": 4,
+   "gain": 1.35
+  },
+  {
+   "scene": 5,
+   "gain": 0.55
+  },
+  {
+   "scene": 6,
+   "gain": 0.7
+  }
+ ],
+ "sfx": [
+  {
+   "name": "whoosh",
+   "at": 0.0,
+   "gain": 1.0
+  },
+  {
+   "name": "hit",
+   "at": 0.35,
+   "gain": 1.0
+  },
+  {
+   "name": "blip",
+   "scene": 1,
+   "offset": 2.4,
+   "gain": 0.5
+  },
+  {
+   "name": "blip",
+   "scene": 1,
+   "offset": 2.75,
+   "gain": 0.5
+  },
+  {
+   "name": "blip",
+   "scene": 1,
+   "offset": 3.1,
+   "gain": 0.5
+  },
+  {
+   "name": "blip",
+   "scene": 1,
+   "offset": 3.45,
+   "gain": 0.5
+  },
+  {
+   "name": "whoosh",
+   "scene": 3,
+   "offset": 1.1,
+   "gain": 0.5
+  },
+  {
+   "name": "swell",
+   "scene": 4,
+   "offset": 0.0,
+   "gain": 0.9
+  },
+  {
+   "name": "hit",
+   "scene": 5,
+   "offset": 0.0,
+   "gain": 0.9
+  },
+  {
+   "name": "glitch",
+   "scene": 6,
+   "offset": -0.55,
+   "from": "end",
+   "gain": 0.9
+  },
+  {
+   "name": "hit",
+   "scene": 7,
+   "offset": 0.05,
+   "gain": 0.8
+  }
+ ],
+ "scenes": [
+  {
+   "type": "cyber_hook",
+   "narration": "Hacker siz haqingizda nimalarni bilishi mumkin?",
+   "lines": [
+    "HACKER",
+    "SIZ HAQINGIZDA",
+    "NIMALARNI BILADI?"
+   ],
+   "min": 3.4
+  },
+  {
+   "type": "cyber_username",
+   "narration": "Birinchisi — username. Bitta username orqali boshqa platformalardagi profilingiz topilishi mumkin.",
+   "step": "1. Username",
+   "username": "cyber_user01",
+   "found": [
+    "instagram",
+    "telegram",
+    "github",
+    "reddit"
+   ],
+   "sub": "Bitta username orqali boshqa platformalardagi profilingiz topilishi mumkin."
+  },
+  {
+   "type": "cyber_email",
+   "narration": "Email orqali esa eski registratsiyalar yoki ochiq ma'lumotlar aniqlanishi mumkin.",
+   "step": "2. Email",
+   "email": "user123@example.com",
+   "chips": [
+    "Eski forum · 2016",
+    "Onlayn do'kon",
+    "O'yin akkaunti",
+    "!Ma'lumot sizib chiqishi · 2019"
+   ],
+   "sub": ""
+  },
+  {
+   "type": "cyber_phone",
+   "narration": "Telefon raqami, eski postlar va boshqa ochiq ma'lumotlar ham iz qoldirishi mumkin.",
+   "step": "3. Ochiq ma'lumotlar",
+   "phone": "+998 ** *** ** **",
+   "cards": [
+    {
+     "icon": "map",
+     "label": "XARITA"
+    },
+    {
+     "icon": "post",
+     "label": "ESKI POSTLAR"
+    },
+    {
+     "icon": "photo",
+     "label": "RASMLAR"
+    }
+   ]
+  },
+  {
+   "type": "cyber_connect",
+   "narration": "Eng xavflisi esa — bu ma'lumotlarning ko'pini o'zimiz internetda ochiq qoldiramiz.",
+   "nodes": [
+    "USERNAME",
+    "EMAIL",
+    "PHONE",
+    "OLD POSTS",
+    "PUBLIC DATA"
+   ],
+   "q": "ENG XAVFLISI NIMA?",
+   "answer": "KO'PCHILIGINI O'ZIMIZ OCHIQ QOLDIRAMIZ.",
+   "answer_at": 2.4,
+   "min": 5.0
+  },
+  {
+   "type": "cyber_shield",
+   "narration": "Cyber Security — faqat hacking emas. Bu o'zingizni himoya qilishni bilish.",
+   "cut": "hard",
+   "l1": "CYBER SECURITY — FAQAT HACKING EMAS.",
+   "l2": "O'ZINGIZNI HIMOYA QILISHNI BILISH."
+  },
+  {
+   "type": "cyber_outro",
+   "narration": "Bu faqat boshlanishi.",
+   "l1": "1-QISM",
+   "l2": "CYBER SECURITY",
+   "l3": "Davomi bor...",
+   "min": 3.2,
+   "extra": 0.6
+  },
+  {
+   "type": "brand",
+   "narration": "FR3NZY kanaliga obuna bo'ling.",
+   "cta": "Obuna bo'ling",
+   "sub": "@fr3nzy",
+   "min": 3.8,
+   "cut": "hard"
+  }
+ ],
+ "lead": 0.3,
+ "tail": 0.35
+}

@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<style>
+  :root { --w:1080px; --h:1920px; --neon:#3ee0ff; --neon2:#1e6cff; --dim:#0b1a2e; --bg:#020409; --green:#5cffa1; --red:#ff4d6d; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { width:var(--w); height:var(--h); overflow:hidden; background:var(--bg); color:#fff;
+    font-family:"Avenir Next","SF Pro Display",-apple-system,"Helvetica Neue",Arial,sans-serif; }
+  .mono { font-family:"SF Mono",Menlo,"Courier New",monospace; }
+  #stage { position:relative; width:var(--w); height:var(--h); overflow:hidden; background:radial-gradient(ellipse at 50% 35%, #071427 0%, #020409 60%); }
+
+  /* global bg */
+  .grid { position:absolute; left:-200px; right:-200px; top:1150px; height:900px; background-image:linear-gradient(rgba(62,224,255,.14) 1px, transparent 1px), linear-gradient(90deg, rgba(62,224,255,.14) 1px, transparent 1px); background-size:90px 90px; transform-origin:50% 0; transform:perspective(700px) rotateX(70deg); opacity:.55; }
+  .rain { position:absolute; inset:0; overflow:hidden; opacity:.35; }
+  .rain .col { position:absolute; top:0; font-size:22px; line-height:26px; color:var(--neon); white-space:pre; text-shadow:0 0 8px rgba(62,224,255,.6); }
+  .scan { position:absolute; inset:0; background:repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 2px, transparent 2px 5px); pointer-events:none; }
+  .vig { position:absolute; inset:0; background:radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,.75) 100%); }
+  .flash { position:absolute; inset:0; background:#fff; opacity:0; }
+  .progress { position:absolute; top:0; left:0; height:8px; background:linear-gradient(90deg,var(--neon2),var(--neon)); width:0; box-shadow:0 0 18px var(--neon); }
+  .brand { position:absolute; top:110px; left:0; right:0; text-align:center; font-size:26px; letter-spacing:10px; font-weight:600; color:rgba(62,224,255,.75); text-transform:uppercase; }
+
+  .scene { position:absolute; inset:0; opacity:0; }
+  .cam { position:absolute; inset:0; transform-origin:50% 45%; }
+  .a { opacity:0; }
+
+  /* headline styles */
+  .h { font-weight:800; text-transform:uppercase; letter-spacing:1px; line-height:1.05; text-align:center; text-shadow:0 0 30px rgba(62,224,255,.35), 0 8px 30px rgba(0,0,0,.6); }
+  .h.big { font-size:104px; }
+  .h.mid { font-size:76px; }
+  .h.sm { font-size:52px; }
+  .h .neon { color:var(--neon); text-shadow:0 0 24px rgba(62,224,255,.8); }
+  .step { position:absolute; top:230px; left:0; right:0; text-align:center; font-size:54px; font-weight:800; letter-spacing:6px; color:var(--neon); text-shadow:0 0 20px rgba(62,224,255,.7); text-transform:uppercase; }
+  .step::after { content:""; display:block; width:90px; height:5px; background:var(--neon); margin:18px auto 0; box-shadow:0 0 16px var(--neon); }
+  .sub { position:absolute; left:90px; right:90px; bottom:520px; text-align:center; font-size:40px; font-weight:600; line-height:1.35; color:rgba(255,255,255,.85); }
+
+  /* windows / cards */
+  .win { position:absolute; background:rgba(4,12,26,.92); border:2px solid rgba(62,224,255,.45); border-radius:22px; box-shadow:0 0 40px rgba(30,108,255,.25), inset 0 0 60px rgba(30,108,255,.08); overflow:hidden; }
+  .win .bar { height:54px; background:rgba(62,224,255,.12); border-bottom:1px solid rgba(62,224,255,.3); display:flex; align-items:center; padding:0 24px; gap:12px; font-size:22px; color:rgba(62,224,255,.8); letter-spacing:3px; }
+  .win .bar i { width:16px; height:16px; border-radius:50%; background:rgba(62,224,255,.5); display:inline-block; }
+  .term { padding:22px 26px; font-size:24px; line-height:34px; color:var(--neon); white-space:pre; text-shadow:0 0 6px rgba(62,224,255,.5); }
+  .cursor { display:inline-block; width:18px; height:34px; background:var(--neon); vertical-align:-6px; margin-left:4px; }
+
+  /* silhouette */
+  .sil { position:absolute; left:50%; bottom:0; transform:translateX(-50%); }
+
+  /* username scene */
+  .profile { left:90px; right:90px; top:400px; height:980px; }
+  .prow { display:flex; align-items:center; gap:26px; padding:26px 34px; }
+  .avatar { width:120px; height:120px; border-radius:50%; background:linear-gradient(135deg,#1e6cff,#3ee0ff); box-shadow:0 0 30px rgba(62,224,255,.6); position:relative; }
+  .avatar::after { content:""; position:absolute; left:34px; top:24px; width:52px; height:52px; border-radius:50%; background:rgba(2,4,9,.8); box-shadow:0 68px 0 20px rgba(2,4,9,.8); }
+  .uname { font-size:44px; font-weight:700; }
+  .uname .k { color:rgba(62,224,255,.7); font-size:26px; letter-spacing:4px; display:block; margin-bottom:8px; }
+  .found { padding:0 34px 20px; display:flex; flex-direction:column; gap:14px; }
+  .fr { display:flex; justify-content:space-between; align-items:center; font-size:30px; padding:16px 22px; background:rgba(62,224,255,.06); border:1px solid rgba(62,224,255,.18); border-radius:14px; }
+  .fr .ok { color:var(--green); font-weight:700; letter-spacing:2px; text-shadow:0 0 10px rgba(92,255,161,.6); }
+  .pbar { margin:10px 34px 24px; height:10px; background:rgba(255,255,255,.08); border-radius:5px; overflow:hidden; }
+  .pbar i { display:block; height:100%; background:linear-gradient(90deg,var(--neon2),var(--neon)); box-shadow:0 0 12px var(--neon); }
+
+  /* email scene */
+  .env { position:absolute; left:50%; top:560px; transform:translateX(-50%); }
+  .mailwin { left:90px; right:90px; top:790px; height:230px; }
+  .mail { padding:30px 34px; font-size:48px; letter-spacing:1px; text-align:center; }
+  .mail .m { color:var(--neon); }
+  .chips { position:absolute; left:90px; right:90px; top:1080px; display:flex; flex-wrap:wrap; gap:20px; justify-content:center; }
+  .chip { font-size:30px; font-weight:600; padding:20px 30px; border-radius:16px; background:rgba(30,108,255,.14); border:1px solid rgba(62,224,255,.35); }
+  .chip.bad { border-color:rgba(255,77,109,.6); color:#ffb3c0; background:rgba(255,77,109,.1); }
+
+  /* phone scene */
+  .phone { position:absolute; left:50%; top:440px; transform:translateX(-50%); width:420px; height:800px; border-radius:60px; border:6px solid rgba(62,224,255,.5); background:rgba(4,12,26,.95); box-shadow:0 0 60px rgba(30,108,255,.35); overflow:hidden; }
+  .phone .notch { width:160px; height:34px; background:#0a1628; border-radius:0 0 24px 24px; margin:0 auto; }
+  .phone .k { margin:60px 0 0; text-align:center; font-size:22px; letter-spacing:5px; color:rgba(62,224,255,.7); }
+  .phone .num { margin-top:24px; text-align:center; font-size:38px; font-weight:700; color:var(--neon); letter-spacing:0; white-space:nowrap; }
+  .cards { position:absolute; left:60px; right:60px; top:1290px; display:flex; gap:20px; justify-content:center; }
+  .card { flex:1; height:200px; border-radius:22px; background:rgba(4,12,26,.92); border:2px solid rgba(62,224,255,.35); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; font-size:24px; font-weight:600; letter-spacing:2px; color:rgba(255,255,255,.85); }
+  .card svg { width:70px; height:70px; }
+
+  /* connect scene */
+  .net { position:absolute; left:0; top:380px; width:1080px; height:1000px; }
+  .net text { font-family:"SF Mono",Menlo,monospace; font-size:28px; font-weight:700; fill:#fff; text-anchor:middle; letter-spacing:2px; }
+  .lines { position:absolute; left:90px; right:90px; top:1300px; text-align:center; }
+  .lines .l1 { font-size:66px; font-weight:800; letter-spacing:2px; }
+  .lines .l2 { font-size:52px; font-weight:800; color:var(--neon); margin-top:30px; line-height:1.2; text-shadow:0 0 20px rgba(62,224,255,.7); }
+
+  /* shield */
+  .shield { position:absolute; left:50%; top:520px; transform:translateX(-50%); width:520px; height:560px; }
+  .parts { position:absolute; left:0; top:0; width:1080px; height:1920px; }
+  .pt { position:absolute; width:8px; height:8px; border-radius:50%; background:var(--neon); box-shadow:0 0 12px var(--neon); }
+  .sh1 { position:absolute; left:80px; right:80px; top:1160px; font-size:64px !important; }
+  .sh2 { position:absolute; left:80px; right:80px; top:1460px; font-size:46px !important; }
+
+  /* outro */
+  .tl { position:absolute; height:3px; background:var(--neon); box-shadow:0 0 10px var(--neon); opacity:.45; }
+  .o1 { position:absolute; left:0; right:0; top:760px; text-align:center; font-size:150px; font-weight:800; letter-spacing:6px; }
+  .o2 { position:absolute; left:0; right:0; top:960px; text-align:center; font-size:64px; font-weight:800; letter-spacing:12px; color:var(--neon); text-shadow:0 0 24px rgba(62,224,255,.8); }
+  .o3 { position:absolute; left:0; right:0; top:1120px; text-align:center; font-size:38px; letter-spacing:6px; color:rgba(255,255,255,.7); }
+  .gl { position:absolute; left:0; right:0; }
+
+
+  /* ---- brand end card ---- */
+  .brandbg { position:absolute; inset:0; background:var(--brand-bg,#070b16); }
+  .brandglow { position:absolute; left:50%; top:46%; width:1400px; height:1400px; opacity:.32; transform:translate(-50%,-50%); background:radial-gradient(circle, var(--brand-acc,#f26a1b) 0%, transparent 62%); }
+  .logo { position:absolute; left:50%; top:46%; width:820px; transform:translate(-50%,-50%); filter:drop-shadow(0 0 40px rgba(242,106,27,.45)); }
+  .logo img { width:100%; display:block; }
+  .logofb { text-align:center; font-family:"Avenir Next","Helvetica Neue",Arial,sans-serif; }
+  .logofb .n { font-size:190px; font-weight:800; letter-spacing:6px; color:#fff; line-height:1; }
+  .logofb .n b { color:var(--brand-acc,#f26a1b); font-weight:800; }
+  .logofb .t { margin-top:26px; font-size:40px; letter-spacing:10px; color:rgba(255,255,255,.85); font-weight:600; }
+  .logofb .t b { color:var(--brand-acc,#f26a1b); font-weight:600; }
+  .brandcta { position:absolute; left:50%; top:1400px; transform:translateX(-50%); background:var(--brand-acc,#f26a1b); color:#0a0e1a; font-weight:800; font-size:46px; letter-spacing:4px; padding:30px 76px; border-radius:60px; box-shadow:0 20px 60px rgba(242,106,27,.35); text-transform:uppercase; white-space:nowrap; }
+  .brandsub { position:absolute; left:0; right:0; top:1540px; text-align:center; font-size:34px; letter-spacing:6px; color:rgba(255,255,255,.6); text-transform:uppercase; }
+  .bp { position:absolute; width:6px; height:6px; border-radius:50%; background:var(--brand-acc,#f26a1b); box-shadow:0 0 10px var(--brand-acc,#f26a1b); }
+
+
+  /* ---- generic types in cyber style ---- */
+  .gwrap { position:absolute; left:80px; right:80px; top:420px; bottom:560px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; }
+  .gbody { font-size:44px; font-weight:500; line-height:1.4; color:rgba(255,255,255,.85); margin-top:34px; }
+  .gsub { font-size:38px; font-weight:500; line-height:1.35; color:rgba(62,224,255,.85); margin-top:30px; }
+  .gbar { width:110px; height:6px; background:var(--neon); box-shadow:0 0 16px var(--neon); margin:34px auto 0; }
+  .glist { margin-top:44px; width:100%; display:flex; flex-direction:column; gap:22px; }
+  .gitem { display:flex; align-items:center; gap:26px; text-align:left; background:rgba(4,12,26,.9); border:2px solid rgba(62,224,255,.35); border-radius:18px; padding:26px 34px; font-size:40px; font-weight:600; box-shadow:0 0 30px rgba(30,108,255,.15); }
+  .gitem .n { flex:none; width:70px; height:70px; border-radius:12px; background:var(--neon); color:#06131f; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:34px; box-shadow:0 0 16px var(--neon); }
+  .gval { font-size:200px; font-weight:800; line-height:1; letter-spacing:-4px; color:var(--neon); text-shadow:0 0 40px rgba(62,224,255,.7); }
+  .gval.long { font-size:130px; letter-spacing:0; }
+  .glabel { font-size:46px; font-weight:600; margin-top:26px; color:rgba(255,255,255,.9); line-height:1.3; }
+  .gq { font-size:60px; font-weight:700; line-height:1.3; font-style:italic; }
+  .ga { font-size:36px; color:rgba(62,224,255,.85); margin-top:34px; }
+  .gcmp { width:100%; display:flex; gap:90px; margin-top:40px; position:relative; }
+  .gcol { flex:1; min-width:0; background:rgba(4,12,26,.9); border:2px solid rgba(62,224,255,.35); border-radius:22px; padding:34px 28px; text-align:left; }
+  .gcol h3 { font-size:42px; font-weight:800; margin-bottom:22px; color:var(--neon); } .gcol.l h3 { color:var(--red); }
+  .gcol li { list-style:none; font-size:32px; padding:10px 0; border-top:1px solid rgba(62,224,255,.15); }
+  .gvs { position:absolute; left:50%; top:50%; margin:-46px 0 0 -46px; width:92px; height:92px; border-radius:50%; background:#fff; color:#0b0f1a; font-weight:800; font-size:32px; display:flex; align-items:center; justify-content:center; }
+  .gcta { margin-top:56px; background:var(--neon); color:#06131f; font-weight:800; font-size:42px; letter-spacing:3px; padding:28px 66px; border-radius:60px; box-shadow:0 0 40px rgba(62,224,255,.5); text-transform:uppercase; }
+
+  /* captions */
+  .cap { position:absolute; left:60px; right:60px; bottom:250px; text-align:center; font-size:52px; font-weight:800; line-height:1.3; text-shadow:0 4px 18px rgba(0,0,0,.8); text-transform:uppercase; letter-spacing:1px; }
+  .cap .cw { display:inline-block; margin:0 9px; color:rgba(255,255,255,.5); }
+  .cap .cw.on { color:var(--neon); text-shadow:0 0 18px rgba(62,224,255,.9); }
+  .cap .cw.done { color:#fff; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="grid" id="grid"></div>
+  <div class="rain" id="rain"></div>
+  <div class="vig"></div>
+  <div class="brand" id="brand"></div>
+  <div id="scenes"></div>
+  <div class="scan"></div>
+  <div class="cap" id="cap"></div>
+  <div class="flash" id="flash"></div>
+  <div class="progress" id="progress"></div>
+</div>
+
+<script src="people.js"></script>
+<script>
+const PEOPLE={};
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const eo=t=>1-Math.pow(1-clamp(t,0,1),3);
+const eob=t=>{t=clamp(t,0,1);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);};
+const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function seeded(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+const HEX='0123456789ABCDEF';
+function hexline(r,n){let s='';for(let i=0;i<n;i++)s+=HEX[Math.floor(r()*16)];return s;}
+const TERM=['> scanning targets...','> whois lookup ......... OK','> resolving profiles ...','> [+] 3 platforms found','> fetching metadata ....','> hash: 9f2c…e41a','> ports: 22 80 443','> geo: ██████████','> cross-ref: email ← user','> archive.org: 12 hits','> parsing exif ........','> [!] public post 2019','> building graph ......','> ██████████░░ 84%'];
+
+let PLAN=null; const TR=0.35;
+
+function wordmark(){ const b=(PLAN.brand_info||{}); const name=esc(b.name||'BRAND'); const tag=esc(b.tagline||'');
+  const n=name.replace(/(\d+)/g,'<b>$1</b>'); const parts=tag.split(' '); const t=parts.length>1?parts.slice(0,-1).join(' ')+' <b>'+parts[parts.length-1]+'</b>':tag;
+  const r=document.documentElement.style; if(b.accent){r.setProperty('--brand-acc',b.accent);} if(b.bg){r.setProperty('--brand-bg',b.bg);}
+  return `<div class="logofb"><div class="n">${n}</div>${tag?`<div class="t">${t}</div>`:''}</div>`; }
+function setup(plan){
+  PLAN=plan; document.getElementById('brand').textContent=plan.brand||'';
+  // code rain columns
+  const rain=document.getElementById('rain'); rain.innerHTML=''; const r=seeded(9);
+  for(let i=0;i<14;i++){const c=document.createElement('div');c.className='col mono';c.dataset.x=40+i*76;c.dataset.v=60+r()*120;c.dataset.o=r()*1900;c.dataset.s=Math.floor(r()*1e6);rain.appendChild(c);}
+  const box=document.getElementById('scenes'); box.innerHTML='';
+  plan.scenes.forEach((sc,i)=>box.appendChild(build(sc,i)));
+  return plan.scenes.length;
+}
+
+function T(txt,cls){return `<div class="${cls}">${esc(txt)}</div>`;}
+
+function build(sc,i){
+  const el=document.createElement('div'); el.className='scene'; el.id='sc'+i;
+  const cam=document.createElement('div'); cam.className='cam'; el.appendChild(cam);
+  let h='';
+  switch(sc.type){
+    case 'cyber_hook':
+      h+=`<div class="win" style="left:110px;right:110px;top:380px;height:560px;transform:perspective(1400px) rotateX(6deg)"><div class="bar"><i></i><i></i><i></i> ROOT@NODE-7</div><div class="term mono" id="term${i}"></div></div>`;
+      h+=`<div class="win" style="right:50px;width:300px;top:800px;height:220px;transform:perspective(1200px) rotateY(-18deg);opacity:.95"><div class="bar"><i></i> LOG</div><div class="term mono" id="term2_${i}" style="font-size:18px;line-height:24px"></div></div>`;
+      h+=`<div style="position:absolute;left:50%;top:1250px;width:900px;height:700px;transform:translateX(-50%);background:radial-gradient(ellipse at 50% 40%, rgba(62,224,255,.55) 0%, rgba(30,108,255,.25) 30%, transparent 65%)"></div>`;
+      h+=`<div id="pp${i}_0"></div>`; PEOPLE[i+'_0']={anim:'typing_back',color:'#04070d',hood:true,glow:'#3ee0ff',scale:2.1,x:-90,y:1130};
+      h+=`<div style="position:absolute;left:60px;right:60px;top:1000px">${(sc.lines||[]).map((l,k)=>`<div class="h ${k==0?'big':'mid'} a" data-d="${0.25+k*0.55}" ${k==0?'style="color:var(--neon)"':''}>${esc(l)}</div>`).join('')}</div>`;
+      break;
+    case 'cyber_username':
+      h+=`<div class="step a" data-d="0">${esc(sc.step)}</div>`;
+      h+=`<div class="win profile a" data-d="0.2"><div class="bar"><i></i><i></i><i></i> PROFILE LOOKUP</div>
+        <div class="prow"><div class="avatar"></div><div class="uname mono"><span class="k">USERNAME</span><span id="type${i}"></span><span class="cursor" id="cur${i}"></span></div></div>
+        <div class="pbar"><i id="pb${i}" style="width:0"></i></div><div class="found" id="found${i}"></div></div>`;
+      h+=`<div class="sub a" data-d="1.2">${esc(sc.sub)}</div>`;
+      break;
+    case 'cyber_email':
+      h+=`<div class="step a" data-d="0">${esc(sc.step)}</div>`;
+      h+=`<div class="env a" data-d="0.1"><svg width="220" height="170" viewBox="0 0 220 170"><rect x="6" y="14" width="208" height="142" rx="18" fill="rgba(4,12,26,.9)" stroke="#3ee0ff" stroke-width="5"/><path d="M14 30 L110 100 L206 30" fill="none" stroke="#3ee0ff" stroke-width="5" stroke-linecap="round"/></svg></div>`;
+      h+=`<div class="win mailwin a" data-d="0.5"><div class="bar"><i></i><i></i><i></i> EMAIL</div><div class="mail mono" id="mail${i}"></div></div>`;
+      h+=`<div class="chips">${(sc.chips||[]).map((c,k)=>`<div class="chip a ${c.startsWith('!')?'bad':''}" data-d="${1.4+k*0.3}">${esc(c.replace(/^!/,''))}</div>`).join('')}</div>`;
+      h+=`<div class="sub a" data-d="1.0" style="bottom:380px">${esc(sc.sub||'')}</div>`;
+      break;
+    case 'cyber_phone':
+      h+=`<div class="step a" data-d="0">${esc(sc.step)}</div>`;
+      h+=`<div class="phone a" data-d="0.15"><div class="notch"></div><div class="k mono">PHONE NUMBER</div><div class="num mono">${esc(sc.phone)}</div>
+          <svg style="margin:50px auto 0;display:block" width="300" height="300" viewBox="0 0 300 300"><g stroke="#3ee0ff" stroke-width="3" fill="none" opacity=".5"><path d="M20 60 L120 30 L200 70 L280 40"/><path d="M20 140 L110 110 L190 150 L280 120"/><path d="M20 220 L130 190 L200 230 L280 200"/><path d="M120 30 L110 110 L130 190"/><path d="M200 70 L190 150 L200 230"/></g><circle cx="150" cy="150" r="22" fill="#3ee0ff" opacity=".9"/><circle cx="150" cy="150" r="44" fill="none" stroke="#3ee0ff" stroke-width="3" id="ping${i}"/></svg></div>`;
+      h+=`<div id="pp${i}_0" class="a" data-d="0.4"></div>`; PEOPLE[i+'_0']={anim:'phone',color:'#0d2a4a',skin:'#e9c3a0',propAccent:'#3ee0ff',glow:'rgba(62,224,255,.5)',scale:1.15,x:-150,y:700,flip:false};
+      h+=`<div class="cards">${(sc.cards||[]).map((c,k)=>`<div class="card a" data-d="${0.9+k*0.3}">${ICON[c.icon]||''}<span>${esc(c.label)}</span></div>`).join('')}</div>`;
+      break;
+    case 'cyber_connect':
+      const N=sc.nodes||[], cx=540, cy=470, R=380;
+      let svg=`<svg class="net" viewBox="0 0 1080 1000"><defs><linearGradient id="fillg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#3ee0ff"/><stop offset="1" stop-color="#1e6cff"/></linearGradient><clipPath id="clipp${i}"><rect id="cliprect${i}" x="0" y="1000" width="1080" height="1000"/></clipPath></defs>`;
+      svg+=`<g id="person${i}"><path d="M540 330 a70 70 0 1 0 0.1 0 Z M540 420 c-90 0 -150 60 -150 150 v60 h300 v-60 c0 -90 -60 -150 -150 -150 Z" fill="none" stroke="rgba(62,224,255,.5)" stroke-width="5"/><path d="M540 330 a70 70 0 1 0 0.1 0 Z M540 420 c-90 0 -150 60 -150 150 v60 h300 v-60 c0 -90 -60 -150 -150 -150 Z" fill="url(#fillg)" clip-path="url(#clipp${i})"/></g>`;
+      N.forEach((n,k)=>{const a=-Math.PI/2+k*2*Math.PI/N.length; const x=cx+Math.cos(a)*R, y=cy+Math.sin(a)*R*0.95;
+        svg+=`<line x1="${x}" y1="${y}" x2="${cx}" y2="${cy}" stroke="#3ee0ff" stroke-width="4" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" class="ln" data-k="${k}" style="filter:drop-shadow(0 0 6px #3ee0ff)"/>`;
+        svg+=`<g class="nd" data-k="${k}" style="transform-box:fill-box;transform-origin:center"><rect x="${x-125}" y="${y-38}" width="250" height="76" rx="14" fill="rgba(4,12,26,.95)" stroke="#3ee0ff" stroke-width="3"/><text x="${x}" y="${y+10}">${esc(n)}</text></g>`;});
+      svg+=`</svg>`; h+=svg;
+      h+=`<div class="lines"><div class="l1 a" data-d="0.4">${esc(sc.q)}</div><div class="l2 a" data-d="${sc.answer_at||2.6}">${esc(sc.answer)}</div></div>`;
+      break;
+    case 'cyber_shield':
+      h+=`<div class="parts" id="parts${i}">${Array.from({length:34},(_,k)=>`<div class="pt" data-k="${k}"></div>`).join('')}</div>`;
+      h+=`<div class="shield a" data-d="0.1"><svg viewBox="0 0 520 560" width="520" height="560"><defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3ee0ff"/><stop offset="1" stop-color="#1e6cff"/></linearGradient></defs><path d="M260 30 L470 110 C470 330 390 460 260 530 C130 460 50 330 50 110 Z" fill="rgba(4,12,26,.9)" stroke="url(#sg)" stroke-width="12" style="filter:drop-shadow(0 0 30px rgba(62,224,255,.8))"/><path d="M260 90 L420 150 C420 320 360 420 260 475 C160 420 100 320 100 150 Z" fill="url(#sg)" opacity=".25"/><path d="M185 285 L240 340 L345 215" fill="none" stroke="#fff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" id="tick${i}"/></svg></div>`;
+      h+=`<div id="pp${i}_0" class="a" data-d="0.9"></div>`; PEOPLE[i+'_0']={anim:'point',color:'#0d2a4a',skin:'#e9c3a0',glow:'rgba(62,224,255,.45)',scale:1.0,x:-110,y:640};
+      h+=`<div class="sh1 h mid a" data-d="0.8">${esc(sc.l1)}</div><div class="sh2 h sm a" data-d="1.6" style="color:var(--neon)">${esc(sc.l2)}</div>`;
+      break;
+    case 'hook': case 'text': case 'list': case 'stat': case 'quote': case 'compare': case 'outro': {
+      const W=(txt,cls)=>`<div class="h ${cls}">${esc(txt)}</div>`;
+      let g='';
+      if(sc.type==='hook'){ g+=`<div class="a" data-d="0.1">${W(sc.title,'big')}</div>`; if(sc.subtitle) g+=`<div class="gsub a" data-d="0.6">${esc(sc.subtitle)}</div>`; }
+      if(sc.type==='text'){ g+=`<div class="a" data-d="0.1">${W(sc.title,'mid')}</div><div class="gbar a" data-d="0.4"></div>`; if(sc.body) g+=`<div class="gbody a" data-d="0.55">${esc(sc.body)}</div>`; }
+      if(sc.type==='list'){ g+=`<div class="a" data-d="0">${W(sc.title,'mid')}</div><div class="glist">`+(sc.items||[]).map((it,k)=>`<div class="gitem a" data-d="${0.35+k*0.28}"><div class="n mono">${k+1}</div><div>${esc(it)}</div></div>`).join('')+`</div>`; }
+      if(sc.type==='stat'){ const v=String(sc.value||''); g+=`<div class="gval mono ${v.length>5?'long':''} a count" data-d="0" data-v="${esc(v)}">${esc(v)}</div><div class="glabel a" data-d="0.45">${esc(sc.label)}</div>`; }
+      if(sc.type==='quote'){ g+=`<div class="gq a" data-d="0.1">“${esc(sc.quote)}”</div>`; if(sc.author) g+=`<div class="ga a" data-d="0.5">— ${esc(sc.author)}</div>`; }
+      if(sc.type==='compare'){ const L=sc.left||{},R=sc.right||{}; g+=`<div class="a" data-d="0">${W(sc.title,'mid')}</div><div class="gcmp"><div class="gcol l a" data-d="0.3"><h3>${esc(L.title)}</h3><ul>${(L.items||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="gcol r a" data-d="0.5"><h3>${esc(R.title)}</h3><ul>${(R.items||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div><div class="gvs a" data-d="0.7">VS</div></div>`; }
+      if(sc.type==='outro'){ g+=`<div class="a" data-d="0.1">${W(sc.title,'big')}</div>`; if(sc.subtitle) g+=`<div class="gsub a" data-d="0.4">${esc(sc.subtitle)}</div>`; if(sc.cta) g+=`<div class="gcta a" data-d="0.7">${esc(sc.cta)}</div>`; }
+      h+=`<div class="gwrap">${g}</div>`;
+      if(sc.person && sc.person!=='none'){ const o={anim:sc.person,color:'#0d2a4a',skin:'#e9c3a0',propAccent:'#3ee0ff',prop:'#0a1628',glow:'rgba(62,224,255,.45)',scale:1.0,x:20,y:1020};
+        if(['wave','point','idle'].includes(sc.person)){o.x=640;o.flip=(sc.person==='point');} if(sc.person==='walk'||sc.person==='run'){o.x=-320;}
+        h+=`<div id="pp${i}_0" class="a" data-d="0.5"></div>`; PEOPLE[i+'_0']=o; }
+      break; }
+    case 'brand':
+      h+=`<div class="brandbg"></div><div class="brandglow"></div><div id="bp${i}">${Array.from({length:26},(_,k)=>`<div class="bp" data-k="${k}"></div>`).join('')}</div>`;
+      h+=`<div class="logo a" data-d="0.1">${PLAN.logo?`<img src="${PLAN.logo}">`:wordmark()}</div>`;
+      if (sc.cta) h+=`<div class="brandcta a" data-d="0.9">${esc(sc.cta)}</div>`;
+      if (sc.sub) h+=`<div class="brandsub a" data-d="1.3">${esc(sc.sub)}</div>`;
+      break;
+    case 'cyber_outro':
+      h+=`<div id="tls${i}">${Array.from({length:16},(_,k)=>`<div class="tl" data-k="${k}"></div>`).join('')}</div>`;
+      h+=`<div id="pp${i}_0"></div>`; PEOPLE[i+'_0']={anim:'walk',color:'#04070d',hood:true,glow:'#3ee0ff',scale:1.3,x:-400,y:1290};
+      h+=`<div class="gl" id="gl${i}"><div class="o1 a" data-d="0.2">${esc(sc.l1)}</div><div class="o2 a" data-d="0.6">${esc(sc.l2)}</div><div class="o3 a" data-d="1.3">${esc(sc.l3)}</div></div>`;
+      break;
+  }
+  cam.innerHTML=h;
+  Object.keys(PEOPLE).filter(k=>k.startsWith(i+'_')).forEach(k=>{const host=el.querySelector('#pp'+k); if(!host) return; const o=PEOPLE[k]; const pr=People.create(o); host.innerHTML=pr.svg; host.style.cssText='position:absolute;inset:0;pointer-events:none'; host._person=pr; host._opts=o;});
+  return el;
+}
+
+const ICON={
+  map:`<svg viewBox="0 0 64 64"><path d="M32 4 C20 4 12 13 12 24 C12 40 32 60 32 60 C32 60 52 40 52 24 C52 13 44 4 32 4 Z" fill="none" stroke="#3ee0ff" stroke-width="4"/><circle cx="32" cy="24" r="8" fill="#3ee0ff"/></svg>`,
+  post:`<svg viewBox="0 0 64 64"><rect x="8" y="10" width="48" height="44" rx="6" fill="none" stroke="#3ee0ff" stroke-width="4"/><path d="M16 24 h32 M16 34 h32 M16 44 h20" stroke="#3ee0ff" stroke-width="4" stroke-linecap="round"/></svg>`,
+  photo:`<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="none" stroke="#3ee0ff" stroke-width="4"/><circle cx="32" cy="26" r="9" fill="#3ee0ff"/><path d="M14 50 c4-10 12-14 18-14 s14 4 18 14" fill="#3ee0ff"/></svg>`,
+};
+
+function anim(el,local){
+  el.querySelectorAll('.count').forEach(a=>{const d=+a.dataset.d||0;const v=a.dataset.v||'';const m=v.match(/^([^\d]*)(\d[\d.,]*)(.*)$/); if(m){const num=parseFloat(m[2].replace(/[\s,]/g,''));const cur=Math.round(num*eo((local-d)/1.4));a.textContent=m[1]+cur.toLocaleString('en').replace(/,/g,' ')+m[3];}});
+  el.querySelectorAll('.a').forEach(a=>{const d=+a.dataset.d||0;const p=eo((local-d)/0.5),pb=eob((local-d)/0.6);
+    a.style.opacity=p;a.style.transform=a.classList.contains('logo')?`translate(-50%,-50%) scale(${0.7+0.3*pb})`:a.classList.contains('brandcta')?`translateX(-50%) translateY(${(1-p)*50}px)`:(a.classList.contains('env')||a.classList.contains('phone')||a.classList.contains('shield'))?`translateX(-50%) translateY(${(1-p)*40}px) scale(${0.85+0.15*pb})`:`translateY(${(1-p)*50}px) scale(${0.94+0.06*pb})`;});
+}
+function typed(str,local,start,cps){const n=clamp(Math.floor((local-start)*cps),0,str.length);return str.slice(0,n);}
+
+function sceneUpdate(sc,i,local,el){
+  const cam=el.querySelector('.cam'); const r=seeded(1000+i);
+  el.querySelectorAll('[id^="pp'+i+'_"]').forEach(h=>{ if(!h._person) return; h._person.apply(h,local); const sv=h.querySelector('svg');
+    if(h._opts.anim==='walk'||h._opts.anim==='run'){ const sp=h._opts.speed||230; sv.style.left=(h._opts.x+local*sp)+'px'; } });
+  switch(sc.type){
+    case 'cyber_hook':{
+      cam.style.transform=`scale(${1+0.06*clamp(local/sc.len,0,1)})`;
+      const k=Math.floor(local*6); const rr=seeded(k);
+      const t1=el.querySelector('#term'+i); const lines=[];for(let j=0;j<12;j++)lines.push(TERM[Math.floor(rr()*TERM.length)]+'   '+hexline(rr,8));
+      t1.textContent=lines.join('\n');
+      const t2=el.querySelector('#term2_'+i); const l2=[];for(let j=0;j<9;j++)l2.push(hexline(rr,12));t2.textContent=l2.join('\n');
+      break;}
+    case 'cyber_username':{
+      const s=typed(sc.username,local,0.6,14); el.querySelector('#type'+i).textContent=s;
+      el.querySelector('#cur'+i).style.opacity=(Math.floor(local*3)%2)?1:0;
+      const done=0.6+sc.username.length/14; const pp=clamp((local-done)/1.2,0,1); el.querySelector('#pb'+i).style.width=(pp*100)+'%';
+      const f=el.querySelector('#found'+i); const rows=(sc.found||[]);
+      f.innerHTML=rows.map((n,k)=>{const at=done+0.3+k*0.35; if(local<at)return ''; const p=eo((local-at)/0.35); return `<div class="fr mono" style="opacity:${p};transform:translateX(${(1-p)*40}px)"><span>${esc(n)}</span><span class="ok">● TOPILDI</span></div>`;}).join('');
+      break;}
+    case 'cyber_email':{
+      const em=sc.email; const masked=em.replace(/(?<=..)[^@.]/g,'*');
+      const show=Math.floor(local*1.6)%2===0; el.querySelector('#mail'+i).innerHTML=`<span class="m">${esc(show?em:masked)}</span>`;
+      break;}
+    case 'cyber_phone':{
+      const z=local>1.2&&local<2.4?1+0.09*Math.sin(Math.PI*(local-1.2)/1.2):1; cam.style.transform=`scale(${z})`;
+      const pg=el.querySelector('#ping'+i); const ph=(local*1.2)%1; pg.setAttribute('r',44+ph*70); pg.setAttribute('opacity',1-ph);
+      break;}
+    case 'cyber_connect':{
+      const N=(sc.nodes||[]).length;
+      el.querySelectorAll('.nd').forEach(n=>{const k=+n.dataset.k;const p=eob((local-0.2-k*0.22)/0.5);n.style.opacity=clamp(p,0,1);n.style.transform=`scale(${clamp(p,0,1.1)})`;});
+      el.querySelectorAll('.ln').forEach(l=>{const k=+l.dataset.k;const p=eo((local-0.6-k*0.22)/0.6);l.setAttribute('stroke-dashoffset',1-p);});
+      const fill=eo((local-1.8)/1.6); el.querySelector('#cliprect'+i).setAttribute('y',1000-fill*1000);
+      cam.style.transform=`scale(${1+0.04*clamp(local/sc.len,0,1)})`;
+      break;}
+    case 'cyber_shield':{
+      document.getElementById('flash').style.opacity=local<0.08?0.9*(1-local/0.08):0;
+      el.querySelector('#tick'+i).setAttribute('stroke-dashoffset',1-eo((local-0.6)/0.6));
+      const rr=seeded(77); el.querySelectorAll('.pt').forEach(p=>{const k=+p.dataset.k;const ring=k%3;const rad=330+ring*70+Math.sin(local*2+k)*10;const sp=(0.35+ring*0.12)*(k%2?1:-1);const a=rr()*6.283+local*sp;
+        p.style.transform=`translate(${540+Math.cos(a)*rad}px,${800+Math.sin(a)*rad*0.55}px) scale(${0.6+rr()*0.9})`;p.style.opacity=clamp((local-0.3)*2,0,1)*(0.5+0.5*Math.sin(local*3+k));});
+      break;}
+    case 'brand':{
+    const rr=seeded(321); el.querySelectorAll('.bp').forEach(p=>{const k=+p.dataset.k;const a=rr()*6.283+local*(0.12+rr()*0.2)*(k%2?1:-1);const rad=430+rr()*160+Math.sin(local*1.5+k)*12;
+      p.style.transform=`translate(${540+Math.cos(a)*rad}px,${880+Math.sin(a)*rad*0.9}px) scale(${0.5+rr()*1.2})`;p.style.opacity=clamp((local-0.2)*1.5,0,1)*(0.4+0.6*Math.abs(Math.sin(local*2+k)));});
+      break;}
+    case 'cyber_outro':{
+      const rr=seeded(5); el.querySelectorAll('.tl').forEach(l=>{const k=+l.dataset.k;const y=120+rr()*1700,w=120+rr()*500,v=(40+rr()*120)*(k%2?1:-1),x0=rr()*1080;let x=(x0+v*local)%1400;if(x<0)x+=1400;l.style.top=y+'px';l.style.width=w+'px';l.style.left=(x-300)+'px';});
+      const g=el.querySelector('#gl'+i); const gt=sc.len-local;
+      if(gt<0.55&&gt>0){const q=seeded(Math.floor(local*30));const dx=(q()-0.5)*40,dy=(q()-0.5)*14;g.style.transform=`translate(${dx}px,${dy}px)`;g.style.filter=`drop-shadow(${(q()-0.5)*30}px 0 0 rgba(255,0,80,.7)) drop-shadow(${(q()-0.5)*30}px 0 0 rgba(0,255,255,.7))`;g.style.opacity=q()<0.15?0.35:1;}
+      else{g.style.transform='';g.style.filter='';g.style.opacity=1;}
+      break;}
+  }
+}
+
+function captions(sc,t){
+  const box=document.getElementById('cap'); if(PLAN.captions===false){box.innerHTML='';return;}
+  const ws=sc.words||[]; if(!ws.length){box.innerHTML='';return;}
+  const CH=4; let idx=-1; for(let i=0;i<ws.length;i++) if(t>=ws[i].t0) idx=i;
+  if(t<ws[0].t0-0.2||t>ws[ws.length-1].t1+0.5){box.innerHTML='';return;}
+  const gi=Math.max(0,Math.floor(Math.max(idx,0)/CH)); const ch=ws.slice(gi*CH,gi*CH+CH);
+  box.innerHTML=ch.map((w,i)=>{const g=gi*CH+i;return `<span class="cw ${g===idx?'on':g<idx?'done':''}">${esc(w.text)}</span>`;}).join('');
+}
+
+function seek(t){
+  if(!PLAN)return; const total=PLAN.duration;
+  document.getElementById('progress').style.width=(1080*clamp(t/total,0,1))+'px';
+  document.getElementById('flash').style.opacity=0;
+  document.querySelectorAll('.rain .col').forEach(c=>{const rr=seeded(+c.dataset.s+Math.floor(t*8));let s='';for(let j=0;j<8;j++)s+=hexline(rr,1)+'\n';c.textContent=s;let y=(+c.dataset.o+t*c.dataset.v)%2100;c.style.transform=`translate(${c.dataset.x}px,${y-200}px)`;});
+  document.getElementById('grid').style.backgroundPosition=`0 ${(t*40)%90}px`;
+  let active=null;
+  PLAN.scenes.forEach((sc,i)=>{
+    const el=document.getElementById('sc'+i); const local=t-sc.start; const last=i===PLAN.scenes.length-1;
+    const hard=sc.cut==='hard'; let op=0;
+    if(t>=sc.start&&t<sc.end){op=1; if(i>0&&local<TR&&!hard)op=eo(local/TR);}
+    else if(t>=sc.end&&t<sc.end+TR&&!last){const nx=PLAN.scenes[i+1]; op=(nx&&nx.cut==='hard')?0:1-eo((t-sc.end)/TR);}
+    el.style.opacity=op;
+    if(op>0){ sc.len=sc.end-sc.start; anim(el,Math.max(local,0)); sceneUpdate(sc,i,Math.max(local,0),el); }
+    if(t>=sc.start&&t<sc.end)active=sc;
+  });
+  if(active)captions(active,t); else document.getElementById('cap').innerHTML='';
+}
+window.setup=setup; window.seek=seek;
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+{
+ "title": "Sun'iy intellekt haqida 3 ta hayratlanarli fakt",
+ "brand": "FR3NZY",
+ "theme": "midnight",
+ "music_mood": "inspiring",
+ "scenes": [
+  {
+   "type": "hook",
+   "narration": "Sun'iy intellekt haqida bu uchta faktni bilarmidingiz? Uchinchisi sizni hayratga soladi.",
+   "emoji": "🤖",
+   "title": "Sun'iy intellekt haqida 3 fakt",
+   "subtitle": "Oxirigacha ko'ring",
+   "person": "wave"
+  },
+  {
+   "type": "stat",
+   "narration": "Bugun dunyodagi kompaniyalarning yetmish yetti foizi sun'iy intellektdan u yoki bu ko'rinishda foydalanmoqda.",
+   "value": "77%",
+   "label": "kompaniyalar AI ishlatadi",
+   "person": "point"
+  },
+  {
+   "type": "text",
+   "narration": "Zamonaviy modellar bir necha soniyada butun bir kitobni o'qib, qisqacha mazmunini aytib bera oladi.",
+   "emoji": "📚",
+   "title": "Soniyalar ichida kitob",
+   "body": "Butun kitob — bir necha soniyada tahlil qilinadi",
+   "person": "typing"
+  },
+  {
+   "type": "list",
+   "narration": "Sun'iy intellekt allaqachon tibbiyot, ta'lim va san'atda odamlarga yordam bermoqda.",
+   "title": "Qayerda ishlaydi?",
+   "items": [
+    "Tibbiyot — kasallik tashxisi",
+    "Ta'lim — shaxsiy o'qituvchi",
+    "San'at — musiqa va rasm"
+   ],
+   "person": "none"
+  },
+  {
+   "type": "compare",
+   "narration": "Lekin bitta narsani unutmang: sun'iy intellekt vosita, inson esa ijodkor.",
+   "title": "AI va inson",
+   "left": {
+    "title": "AI",
+    "items": [
+     "Tez hisoblaydi",
+     "Charchamaydi"
+    ]
+   },
+   "right": {
+    "title": "Inson",
+    "items": [
+     "Ijod qiladi",
+     "His qiladi"
+    ]
+   },
+   "person": "none"
+  },
+  {
+   "type": "outro",
+   "narration": "Qaysi fakt sizni ko'proq hayratga soldi? Izohda yozing va do'stlaringizga ulashing.",
+   "emoji": "💬",
+   "title": "Sizningcha qaysi biri?",
+   "cta": "Izohda yozing",
+   "person": "wave"
+  },
+  {
+   "type": "brand",
+   "narration": "FR3NZY kanaliga obuna bo'ling.",
+   "cta": "Obuna bo'ling",
+   "sub": "@fr3nzy",
+   "min": 3.8
+  }
+ ]
+}
