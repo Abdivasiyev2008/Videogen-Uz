@@ -11,7 +11,7 @@ Prompt ─► Claude (planner.py: full JSON plan) ─► Edge-TTS (Uzbek voice +
 
 ## Quick start / Tez boshlash
 ```bash
-git clone <repo> && cd videogen
+git clone https://github.com/Abdivasiyev2008/Videogen-Uz.git && cd Videogen-Uz
 ./setup.sh                    # venv + deps + Chromium (needs ffmpeg: brew install ffmpeg)
 # Claude: either `claude` (Claude Code, logged in) — or ANTHROPIC_API_KEY in .env
 ./.venv/bin/python make.py "Ommaviy Wi-Fi qanchalik xavfli? 30 soniya, jiddiy erkak ovozi"
