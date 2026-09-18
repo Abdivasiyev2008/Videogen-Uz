@@ -61,6 +61,14 @@ def synthesize(text: str, voice: str, out_mp3: Path, rate: str = "+0%", pitch: s
     import re
     out_mp3.parent.mkdir(parents=True, exist_ok=True)
     text = text.strip() or "…"
+    cache = out_mp3.with_suffix(".json")
+    if cache.exists() and out_mp3.exists() and out_mp3.stat().st_size > 1000:
+        try:
+            old = json.loads(cache.read_text())
+            if old.get("text") == text and old.get("voice") == f"{voice}|{rate}|{pitch}":
+                return old
+        except Exception:
+            pass
     try:
         words = _try_synth(text, voice, out_mp3, rate, pitch)
     except Exception:
@@ -91,7 +99,7 @@ def synthesize(text: str, voice: str, out_mp3: Path, rate: str = "+0%", pitch: s
     # edge-tts ba'zan so'zlarni bo'lak-bo'lak beradi; oxirgi so'z tugashini audio uzunligiga tortamiz
     if words:
         words[-1]["t1"] = min(max(words[-1]["t1"], words[-1]["t0"] + 0.15), dur)
-    meta = {"path": str(out_mp3), "duration": dur, "words": words}
+    meta = {"path": str(out_mp3), "duration": dur, "words": words, "text": text, "voice": f"{voice}|{rate}|{pitch}"}
     out_mp3.with_suffix(".json").write_text(json.dumps(meta, ensure_ascii=False, indent=1))
     return meta
 

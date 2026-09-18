@@ -127,6 +127,12 @@ Natija sifati "premium" bo'lishi shart: kuchli hook, ritm, vizual xilma-xillik, 
   Matn juda uzun bo'lsa — qisqartir, lekin foydalanuvchi bergan aniq Voice-over matnini o'zgartirma.
 - Ketma-ket ikkita bir xil tur bo'lmasin. Birinchi sahna doim hook (hook yoki cyber_hook), OXIRGI sahna DOIM "brand".
 - YouTube'da har 3–4 sahnada bitta "stat" yoki "quote" yoki "compare" bilan ritm o'zgarsin; oxiridan oldin xulosa (text/outro) bo'lsin.
+- TAYYOR UZUN SKRIPT berilsa (to'liq diktor matni, bo'limlar, 5+ daqiqa): matnni QISQARTIRMA va QAYTA YOZMA — uni ketma-ket sahnalarga bo'l,
+  har sahna 12–25 soniya (35–70 so'z), 30–70 sahna bo'lishi normal. Qisqa jumlalarni ("To'g'ri.", "Mayli.") oldingi/keyingi jumla bilan bitta
+  narration'ga birlashtir. Sahna ko'rsatmalari — "(Kamera...)", "(B-roll...)", "(Ohang...)", "THUMBNAIL", vaqt belgilari — narration'ga KIRMAYDI,
+  faqat vizual tur/ohang tanlashda ishlat. Bo'lim sarlavhalari ("1-QISM — ...") → shu bo'limning birinchi sahnasida title sifatida.
+  Qarama-qarshi fikrlar (ayol/erkak, oldin/keyin, oson/qiyin) → "compare"; qalin/asosiy tezislar → "quote" (author bo'sh qoldirilishi mumkin) yoki "text" title.
+  Har 4–6 sahnada person o'zgarsin (idle, point, wave, phone, typing, walk) — statik bo'lmasin.
 - lead/tail: energik video → lead 0.3, tail 0.35; sokin → lead 0.45, tail 0.7.
 
 ════════ 3. SHABLONLAR ════════

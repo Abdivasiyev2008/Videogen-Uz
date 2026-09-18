@@ -54,7 +54,7 @@ def build_timeline(script: dict, voice: str, work: Path) -> dict:
         extra = dict(script.get("pronunciations") or {})
         if planner.BRAND.get("say"):
             extra.setdefault(planner.BRAND["name"], planner.BRAND["say"])
-        spoken = pronounce.for_tts(sc["narration"], extra)  # inglizcha so'zlar talaffuzi
+        spoken = pronounce.for_tts(sc["narration"].replace("‘", "'").replace("’", "'").replace("ʻ", "'").replace("ʼ", "'"), extra)  # inglizcha so'zlar talaffuzi
         meta = tts.synthesize(spoken, voice, work / f"voice_{i:02d}.mp3",
                               rate=script.get("voice_rate", "+0%"), pitch=script.get("voice_pitch", "+0Hz"))
         # subtitrlarda asl yozuv ko'rinsin (so'zlar soni mos kelsa)
@@ -85,8 +85,8 @@ def build_timeline(script: dict, voice: str, work: Path) -> dict:
 
 
 def render_frames(plan: dict, work: Path, template: str = "template") -> Path:
-    W, H = FORMATS.get(plan.get("format", "vertical"), FORMATS["vertical"])
     """Chromium'da har kadrni chizib, ffmpeg'ga uzatadi -> ovozsiz mp4."""
+    W, H = FORMATS.get(plan.get("format", "vertical"), FORMATS["vertical"])
     silent = work / "video_silent.mp4"
     n_frames = int(plan["duration"] * FPS) + 1
     ff = subprocess.Popen(
@@ -95,16 +95,44 @@ def render_frames(plan: dict, work: Path, template: str = "template") -> Path:
         stdin=subprocess.PIPE,
     )
     with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page(viewport={"width": W, "height": H}, device_scale_factor=1)
-        page.goto((TEMPLATES / f"{template}.html").as_uri())
-        page.evaluate("plan => window.setup(plan)", plan)
-        page.wait_for_timeout(300)  # shriftlar/emoji yuklansin
-        for i in range(n_frames):
-            page.evaluate("t => window.seek(t)", i / FPS)
-            ff.stdin.write(page.screenshot(type="jpeg", quality=92))
+        browser = page = None
+
+        def open_page():
+            nonlocal browser, page
+            if browser:
+                try:
+                    browser.close()
+                except Exception:
+                    pass
+            browser = p.chromium.launch()
+            page = browser.new_page(viewport={"width": W, "height": H}, device_scale_factor=1)
+            page.set_default_timeout(60000)
+            page.goto((TEMPLATES / f"{template}.html").as_uri())
+            page.evaluate("plan => window.setup(plan)", plan)
+            page.wait_for_timeout(300)  # shriftlar/emoji yuklansin
+
+        open_page()
+        RESTART_EVERY = 4000  # uzun videolarda xotira to'planmasin
+        i, fails, frame = 0, 0, None
+        while i < n_frames:
+            if i and i % RESTART_EVERY == 0 and fails == 0:
+                open_page()
+            try:
+                page.evaluate("t => window.seek(t)", i / FPS)
+                frame = page.screenshot(type="jpeg", quality=92)
+                fails = 0
+            except Exception as e:  # Chromium qotib qolsa — qayta ochib, shu kadrdan davom
+                fails += 1
+                log(f"! brauzer javob bermadi ({type(e).__name__}), qayta ochilmoqda (kadr {i}, urinish {fails})")
+                open_page()
+                if fails < 3 or frame is None:
+                    continue
+                log("! kadr o'tkazib yuborildi (oldingi kadr takrorlanadi)")
+                fails = 0
+            ff.stdin.write(frame)
             if i % (FPS * 5) == 0:
                 log(f"kadr {i}/{n_frames}  ({i/FPS:.0f}s)")
+            i += 1
         browser.close()
     ff.stdin.close()
     ff.wait()
