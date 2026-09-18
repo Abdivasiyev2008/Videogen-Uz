@@ -16,12 +16,13 @@ git clone https://github.com/Abdivasiyev2008/Videogen-Uz.git && cd Videogen-Uz
 # Claude: either `claude` (Claude Code, logged in) — or ANTHROPIC_API_KEY in .env
 ./.venv/bin/python make.py "Ommaviy Wi-Fi qanchalik xavfli? 30 soniya, jiddiy erkak ovozi"
 ```
-Output: `out/<name>.mp4` (1080×1920, 30 fps), `out/<name>.json` (the plan — edit & re-render), `out/<name>.caption.txt` (Instagram caption + music credit).
+Output: `out/<name>.mp4` (9:16 1080×1920 by default; `--format youtube` → 16:9 1920×1080, 30 fps), `out/<name>.json` (the plan — edit & re-render), `out/<name>.caption.txt` (Instagram caption + music credit).
 
 ```bash
 make.py "..." --plan-only                  # only show the plan
 make.py --prompt-file storyboard.txt       # long storyboard from a file
 make.py --script out/<name>.json           # re-render an edited plan (no Claude call)
+make.py "..." --format youtube            # 16:9 long-form (60–180 s); reels|shorts|9:16 = vertical
 make.py "..." --voice sardor --template cyber --backend cli|api
 ```
 
@@ -32,7 +33,7 @@ Template (`template` universal / `cyber` dark-neon), scene types & fields, narra
 Edit **`brand.json`** (name, handle, tagline, CTA, narration, accent color) and drop your logo at **`assets/logo.png`**. Without a logo the end-card renders a text wordmark in the same style.
 
 ## Pronunciation / Talaffuz
-Uzbek TTS reads English letter-by-letter, so `assets/pronounce.json` maps terms to phonetic Uzbek (`username → yuzerneym`, `cyber security → sayber sekyuriti`). Only the audio changes — on-screen text stays original. Claude adds missing words per script (`pronunciations`). Add your own entries freely.
+Uzbek TTS reads English letter-by-letter, so `assets/pronounce.json` (~220 terms) maps terms to phonetic Uzbek (`username → yuzerneym`, `cyber security → sayber sekyuriti`). Only the audio changes — on-screen text stays original. Claude adds missing words per script (`pronunciations`), and `make.py` prints a warning listing any word that still looks foreign after substitution. Add your own entries freely.
 
 ## Scene types / Sahna turlari
 - **template**: `hook`, `text`, `list`, `stat` (count-up), `quote`, `compare`, `outro` — themes `midnight ocean forest sunset candy gold`, karaoke captions, `person`: `walk run typing phone idle wave point`.

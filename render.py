@@ -18,7 +18,8 @@ ROOT = Path(__file__).parent
 TEMPLATES = ROOT / "renderer"
 MUSIC_DIR = ROOT / "assets" / "music"
 
-W, H, FPS = 1080, 1920, 30
+FPS = 30
+FORMATS = {"vertical": (1080, 1920), "wide": (1920, 1080)}
 LEAD = 0.45      # sahna boshlanib, ovoz boshlangunicha
 TAIL = 0.7       # ovoz tugagach, keyingi sahnagacha
 MIN_SCENE = {"hook": 3.0, "outro": 3.5, "list": 4.0, "compare": 4.5, "brand": 3.5}
@@ -84,6 +85,7 @@ def build_timeline(script: dict, voice: str, work: Path) -> dict:
 
 
 def render_frames(plan: dict, work: Path, template: str = "template") -> Path:
+    W, H = FORMATS.get(plan.get("format", "vertical"), FORMATS["vertical"])
     """Chromium'da har kadrni chizib, ffmpeg'ga uzatadi -> ovozsiz mp4."""
     silent = work / "video_silent.mp4"
     n_frames = int(plan["duration"] * FPS) + 1
@@ -186,11 +188,14 @@ def mix_and_mux(plan: dict, silent: Path, music: Path | None, out: Path, script:
     subprocess.run(cmd, check=True)
 
 
-def make_video(script: dict, out: Path, voice: str = "madina", work: Path | None = None) -> Path:
+def make_video(script: dict, out: Path, voice: str = "madina", work: Path | None = None, fmt: str | None = None) -> Path:
     work = work or (ROOT / "out" / "_work" / out.stem)
     work.mkdir(parents=True, exist_ok=True)
+    fmt = fmt or script.get("format", "vertical")
     log("1/4 ovoz yaratilmoqda")
     plan = build_timeline(script, voice, work)
+    plan["format"] = fmt
+    log(f"format: {fmt} ({'x'.join(map(str, FORMATS[fmt]))})")
     (work / "plan.json").write_text(json.dumps(plan, ensure_ascii=False, indent=1))
     log(f"umumiy uzunlik: {plan['duration']:.1f}s, {len(plan['scenes'])} sahna")
     log("2/4 kadrlar render qilinmoqda")

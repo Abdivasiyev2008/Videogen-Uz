@@ -80,6 +80,25 @@
   .captions .cw { display: inline-block; margin: 0 10px; padding: 4px 8px; border-radius: 16px; color: rgba(255,255,255,.55); transition: none; }
   .captions .cw.on { color: #fff; background: var(--acc); color: #06131f; transform: scale(1.08); }
   .captions .cw.done { color: #fff; }
+
+  /* ---- 16:9 (YouTube) overrides ---- */
+  html[data-fmt="wide"] .b1 { left:-300px; top:-500px; } html[data-fmt="wide"] .b2 { right:-350px; top:-250px; } html[data-fmt="wide"] .b3 { left:600px; bottom:-700px; }
+  html[data-fmt="wide"] .brand { top:44px; font-size:22px; letter-spacing:7px; } html[data-fmt="wide"] .brand::after { margin-top:10px; }
+  html[data-fmt="wide"] .content { left:220px; right:220px; top:140px; bottom:200px; }
+  html[data-fmt="wide"] .emoji { font-size:140px; margin-bottom:22px; }
+  html[data-fmt="wide"] .title { font-size:86px; } html[data-fmt="wide"] .title.small { font-size:64px; }
+  html[data-fmt="wide"] .subtitle { font-size:36px; margin-top:22px; }
+  html[data-fmt="wide"] .body { font-size:40px; margin-top:26px; max-width:1300px; }
+  html[data-fmt="wide"] .list { margin-top:28px; max-width:1100px; gap:14px; }
+  html[data-fmt="wide"] .item { padding:18px 28px; font-size:34px; } html[data-fmt="wide"] .item .n { width:58px; height:58px; font-size:28px; }
+  html[data-fmt="wide"] .type-stat .value { font-size:190px; } html[data-fmt="wide"] .type-stat .label { font-size:42px; }
+  html[data-fmt="wide"] .type-quote .mark { font-size:190px; } html[data-fmt="wide"] .type-quote .q { font-size:52px; max-width:1300px; }
+  html[data-fmt="wide"] .compare { max-width:1300px; }
+  html[data-fmt="wide"] .cta { font-size:36px; padding:22px 56px; margin-top:36px; }
+  html[data-fmt="wide"] .captions { bottom:64px; left:300px; right:300px; font-size:44px; }
+  html[data-fmt="wide"] .logo { width:620px; top:42%; } html[data-fmt="wide"] .logofb .n { font-size:150px; } html[data-fmt="wide"] .logofb .t { font-size:32px; }
+  html[data-fmt="wide"] .brandcta { top:790px; font-size:36px; padding:22px 56px; } html[data-fmt="wide"] .brandsub { top:890px; font-size:26px; }
+  html[data-fmt="wide"] .brandglow { width:1200px; height:1200px; top:44%; }
 </style>
 </head>
 <body>
@@ -114,7 +133,9 @@ const THEMES = {
 };
 
 // ---------- state ----------
-let PLAN = null;   // {brand, theme, scenes:[{type,start,end,words:[{t0,t1,text}], ...}]}
+let PLAN = null;   // {brand, theme, format, scenes:[...]}
+let W=1080, H=1920, WIDE=false;
+function applyFormat(f){ WIDE=(f==='wide'); W=WIDE?1920:1080; H=WIDE?1080:1920; document.documentElement.dataset.fmt=WIDE?'wide':'vertical'; const r=document.documentElement.style; r.setProperty('--w',W+'px'); r.setProperty('--h',H+'px'); }
 const TRANS = 0.5;
 
 function applyTheme(name){
@@ -129,7 +150,7 @@ function buildDots(){
   const rnd = seeded(42);
   for (let i=0;i<28;i++){
     const d=document.createElement('div'); d.className='dot';
-    d.dataset.x = rnd()*1080; d.dataset.y = rnd()*1920; d.dataset.s = 0.4+rnd()*1.2; d.dataset.p = rnd()*6.28; d.dataset.v = 8+rnd()*20;
+    d.dataset.x = rnd()*W; d.dataset.y = rnd()*H; d.dataset.s = 0.4+rnd()*1.2; d.dataset.p = rnd()*6.28; d.dataset.v = 8+rnd()*20;
     d.style.transform=`scale(${d.dataset.s})`; box.appendChild(d);
   }
 }
@@ -193,9 +214,10 @@ function buildScene(sc, i){
   if (sc.person && sc.person!=='none'){
     const o = typeof sc.person==='string' ? {anim:sc.person} : Object.assign({}, sc.person);
     const th = THEMES[PLAN.theme]||THEMES.midnight;
-    const def = {color: th.acc2, skin:'#f2c9a7', propAccent: th.acc, prop:'#1b2233', scale: 1.1, x: 0, y: 960};
-    if (['wave','point','idle'].includes(o.anim)) { def.x = 620; def.flip = (o.anim==='point'); }
-    if (o.anim==='walk'||o.anim==='run') { def.x = -320; def.y = 1010; }
+    const def = WIDE ? {color: th.acc2, skin:'#f2c9a7', propAccent: th.acc, prop:'#1b2233', scale: 0.85, x: 40, y: 500}
+                     : {color: th.acc2, skin:'#f2c9a7', propAccent: th.acc, prop:'#1b2233', scale: 1.1, x: 0, y: 960};
+    if (['wave','point','idle'].includes(o.anim)) { def.x = WIDE?1420:620; def.flip = (o.anim==='point'); }
+    if (o.anim==='walk'||o.anim==='run') { def.x = -320; def.y = WIDE?500:1010; }
     const opts = Object.assign(def, o);
     const pr = People.create(opts); const host=document.createElement('div'); host.className='phost'; host.style.cssText='position:absolute;inset:0;pointer-events:none';
     host.innerHTML=pr.svg; host._person=pr; host._opts=opts; el.appendChild(host);
@@ -208,7 +230,7 @@ function wordmark(){ const b=(PLAN.brand_info||{}); const name=esc(b.name||'BRAN
   const r=document.documentElement.style; if(b.accent){r.setProperty('--brand-acc',b.accent);} if(b.bg){r.setProperty('--brand-bg',b.bg);}
   return `<div class="logofb"><div class="n">${n}</div>${tag?`<div class="t">${t}</div>`:''}</div>`; }
 window.setup = function(plan){
-  PLAN = plan; applyTheme(plan.theme); buildDots();
+  PLAN = plan; applyFormat(plan.format); applyTheme(plan.theme); buildDots();
   document.getElementById('brand').textContent = plan.brand || '';
   const box=document.getElementById('scenes'); box.innerHTML='';
   plan.scenes.forEach((sc,i)=>box.appendChild(buildScene(sc,i)));
@@ -231,7 +253,7 @@ function animate(el, local){
   });
   if (el.querySelector('.bp')){ const local2=local;
     const rr=seeded(321); el.querySelectorAll('.bp').forEach(p=>{const k=+p.dataset.k;const a=rr()*6.283+local2*(0.12+rr()*0.2)*(k%2?1:-1);const rad=430+rr()*160+Math.sin(local2*1.5+k)*12;
-      p.style.transform=`translate(${540+Math.cos(a)*rad}px,${880+Math.sin(a)*rad*0.9}px) scale(${0.5+rr()*1.2})`;p.style.opacity=clamp((local2-0.2)*1.5,0,1)*(0.4+0.6*Math.abs(Math.sin(local2*2+k)));});
+      const rs=WIDE?0.72:1; p.style.transform=`translate(${W/2+Math.cos(a)*rad*rs}px,${(WIDE?470:880)+Math.sin(a)*rad*0.9*rs}px) scale(${0.5+rr()*1.2})`;p.style.opacity=clamp((local2-0.2)*1.5,0,1)*(0.4+0.6*Math.abs(Math.sin(local2*2+k)));});
   }
   // word-by-word pop for titles
   el.querySelectorAll('.title .w').forEach(w=>{
@@ -255,14 +277,14 @@ function captionsAt(sc, t){
 window.seek = function(t){
   if(!PLAN) return;
   const total=PLAN.duration;
-  document.getElementById('progress').style.width=(1080*clamp(t/total,0,1))+'px';
+  document.getElementById('progress').style.width=(W*clamp(t/total,0,1))+'px';
   // background motion
   const b=document.querySelectorAll('.blob');
   b[0].style.transform=`translate(${Math.sin(t*0.25)*120}px, ${Math.cos(t*0.2)*90}px)`;
   b[1].style.transform=`translate(${Math.cos(t*0.18)*140}px, ${Math.sin(t*0.23)*110}px)`;
   b[2].style.transform=`translate(${Math.sin(t*0.21+1)*100}px, ${Math.cos(t*0.17)*80}px)`;
   document.querySelectorAll('.dot').forEach(d=>{
-    const y=(+d.dataset.y - t*d.dataset.v) % 1920; const yy=y<0?y+1920:y;
+    const y=(+d.dataset.y - t*d.dataset.v) % H; const yy=y<0?y+H:y;
     const x=+d.dataset.x + Math.sin(t*0.6+ +d.dataset.p)*20;
     d.style.transform=`translate(${x}px,${yy}px) scale(${d.dataset.s})`;
   });

@@ -47,6 +47,17 @@ def for_tts(text: str, extra: dict | None = None) -> str:
     return text
 
 
+def audit(text: str, extra: dict | None = None) -> list[str]:
+    """Lug'atdan o'tgandan keyin ham 'inglizcha' ko'rinadigan so'zlar (o'zbek lotinida bo'lmagan harf birikmalari)."""
+    spoken = for_tts(text, extra)
+    bad = []
+    for w in re.findall(r"[A-Za-z][A-Za-z'’ʼ\-]+", spoken):
+        lw = w.lower()
+        if "w" in lw or re.search(r"c(?!h)", lw) or re.search(r"ph|ck|ee|oo|th|ea", lw):
+            bad.append(w)
+    return sorted(set(bad), key=str.lower)
+
+
 if __name__ == "__main__":
     import sys
     print(for_tts(" ".join(sys.argv[1:]) or "Cyber Security — faqat hacking emas. Bitta username orqali profilingiz, emailga bog'liq akkauntlar. Hackerlar phone number va old posts ni topadi."))

@@ -79,6 +79,7 @@ SCHEMA = _obj({
     "title": {"type": "string"},
     "brand": {"type": "string"},
     "template": {"type": "string", "enum": ["template", "cyber"]},
+    "format": {"type": "string", "enum": ["vertical", "wide"]},
     "theme": {"type": "string", "enum": THEMES},
     "voice": {"type": "string", "enum": ["madina", "sardor"]},
     "voice_rate": {"type": "string"},
@@ -116,10 +117,16 @@ Natija sifati "premium" bo'lishi shart: kuchli hook, ritm, vizual xilma-xillik, 
 - Ovoz: jiddiy/texnik/qo'rqinchli mavzu → "sardor" (rate "+6%", pitch "-3Hz"); do'stona/lifestyle/ta'lim → "madina" (rate "+4%").
   Foydalanuvchi ovozni aytsa — unga bo'ysun.
 
+- SO'Z SIFATI: adabiy-og'zaki o'zbek tili, ruscha/inglizcha kalka gaplar yo'q ("qilish kerak bo'ladi" o'rniga "qiling"). Har gap tabiiy jaranglasin —
+  o'qib ko'rilganda diktor tilida qoqilmasin. Ergash gaplar, qo'sh inkor, uzun sanoq ro'yxatlari yo'q. Har sahna bitta fikr.
+- Ritm: savol → javob, kontrast ("lekin", "aslida"), aniq raqam, kutilmagan fakt. Hech qachon "bu videoda biz ... haqida gaplashamiz" demang.
+
 ════════ 2. UZUNLIK VA RITM ════════
-- Sahna davomiyligi ≈ narration_so'zlar/2.9 + 0.7 soniya. Foydalanuvchi so'ragan umumiy uzunlikka moslash (odatda 30–50 s).
+- Sahna davomiyligi ≈ narration_so'zlar/2.9 + 0.7 soniya. Foydalanuvchi so'ragan umumiy uzunlikka moslash.
+  Reels/Shorts (format "vertical"): 30–50 s, 6–9 sahna. YouTube (format "wide"): 60–180 s, 9–16 sahna — chuqurroq: sabab, misol, qarshi fikr, amaliy maslahat.
   Matn juda uzun bo'lsa — qisqartir, lekin foydalanuvchi bergan aniq Voice-over matnini o'zgartirma.
-- 6–9 sahna. Ketma-ket ikkita bir xil tur bo'lmasin. Birinchi sahna doim hook (hook yoki cyber_hook), OXIRGI sahna DOIM "brand".
+- Ketma-ket ikkita bir xil tur bo'lmasin. Birinchi sahna doim hook (hook yoki cyber_hook), OXIRGI sahna DOIM "brand".
+- YouTube'da har 3–4 sahnada bitta "stat" yoki "quote" yoki "compare" bilan ritm o'zgarsin; oxiridan oldin xulosa (text/outro) bo'lsin.
 - lead/tail: energik video → lead 0.3, tail 0.35; sokin → lead 0.45, tail 0.7.
 
 ════════ 3. SHABLONLAR ════════
@@ -185,6 +192,7 @@ def finalize(script: dict) -> dict:
     """Claude chiqargan rejani dvigatel formatiga keltiradi va xatolarni to'g'rilaydi."""
     s = _clean(script)
     s.setdefault("template", "template")
+    s.setdefault("format", "vertical")
     s.setdefault("brand", BRAND["name"])
     s.setdefault("voice", "madina")
     s.setdefault("theme", "midnight")
@@ -217,16 +225,20 @@ def finalize(script: dict) -> dict:
 
 
 # ---------------------------------------------------------------- backendlar
-def _user_msg(prompt, voice_hint, template_hint):
+def _user_msg(prompt, voice_hint, template_hint, fmt=None):
     user = prompt
     if voice_hint:
         user += f"\n\n(Ovoz: {voice_hint})"
     if template_hint and template_hint != "auto":
         user += f"\n\n(Shablon: {template_hint})"
+    if fmt == "wide":
+        user += "\n\n(Format: YouTube 16:9 — uzun video, format maydoniga \"wide\" yoz)"
+    elif fmt == "vertical":
+        user += "\n\n(Format: Reels/Shorts 9:16, format maydoniga \"vertical\" yoz)"
     return user
 
 
-def plan_via_cli(prompt: str, voice_hint: str | None = None, template_hint: str | None = None) -> dict:
+def plan_via_cli(prompt: str, voice_hint: str | None = None, template_hint: str | None = None, fmt: str | None = None) -> dict:
     """Claude Code CLI (`claude -p`) orqali — obuna bilan, API kalitsiz."""
     exe = shutil.which("claude")
     if not exe:
@@ -236,7 +248,7 @@ def plan_via_cli(prompt: str, voice_hint: str | None = None, template_hint: str 
     cmd = [exe, "-p", "--tools", "", "--no-session-persistence", "--output-format", "json",
            "--model", MODEL, "--effort", "high",
            "--system-prompt-file", sys_file, "--json-schema", json.dumps(SCHEMA),
-           _user_msg(prompt, voice_hint, template_hint)]
+           _user_msg(prompt, voice_hint, template_hint, fmt)]
     try:
         r = subprocess.run(cmd, capture_output=True, text=True, timeout=900)
     finally:
@@ -256,10 +268,10 @@ def plan_via_cli(prompt: str, voice_hint: str | None = None, template_hint: str 
     return finalize(out)
 
 
-def plan_via_api(prompt: str, voice_hint: str | None = None, template_hint: str | None = None) -> dict:
+def plan_via_api(prompt: str, voice_hint: str | None = None, template_hint: str | None = None, fmt: str | None = None) -> dict:
     """Anthropic SDK orqali (ANTHROPIC_API_KEY)."""
     client = anthropic.Anthropic()
-    user = _user_msg(prompt, voice_hint, template_hint)
+    user = _user_msg(prompt, voice_hint, template_hint, fmt)
     with client.beta.messages.stream(
         model=MODEL,
         max_tokens=32000,
@@ -295,12 +307,12 @@ def backend(prefer: str = "auto") -> str | None:
     return None
 
 
-def plan(prompt: str, voice_hint: str | None = None, template_hint: str | None = None, prefer: str = "auto") -> dict:
+def plan(prompt: str, voice_hint: str | None = None, template_hint: str | None = None, prefer: str = "auto", fmt: str | None = None) -> dict:
     b = backend(prefer)
     if b == "api":
-        return plan_via_api(prompt, voice_hint, template_hint)
+        return plan_via_api(prompt, voice_hint, template_hint, fmt)
     if b == "cli":
-        return plan_via_cli(prompt, voice_hint, template_hint)
+        return plan_via_cli(prompt, voice_hint, template_hint, fmt)
     raise RuntimeError("Na ANTHROPIC_API_KEY, na `claude` CLI topilmadi")
 
 
